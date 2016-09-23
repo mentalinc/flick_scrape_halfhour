@@ -36,7 +36,7 @@ class FlickScrape
 		@lastDataDate = parse_date("01/01/2016")
     end
 
-    @dateChecker = Date.parse("01/01/2016")
+    @dateChecker = Date.parse("01/01/2014")
 
     @driver = Selenium::WebDriver.for :firefox
     @driver.navigate.to "http://myflick.flickelectric.co.nz/dashboard/day"
