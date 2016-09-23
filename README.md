@@ -5,7 +5,7 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 ## Dependencies
 - Written for ruby 2.3.0, but should run on >= 1.9.3
 - Firefox
-- desktop version, must be run with a screen.
+- xvfb if wanting to run headless
 
 ## Usage
 
@@ -14,6 +14,16 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 - By default it will scrape all half hourly data from 1/1/2016. If you dont want this much history on the first run, change line 36 from @lastDataDate = parse_date("01/01/2016") to the date you'd like. If you've joined after 01/01/2016 no need to change anything the script will run to the date you joined.
 - The script stores the last successful date so only the first run will take a long time, after that it will only scrape the the days since last run.
 - `bundle exec ruby main.rb`
+
+
+## To run headless
+sudo apt-get xvfb
+execute script: xvfb-run /home/[username]/.rbenv/shims/ruby /[pathtofile]/main.rb
+
+Run "which ruby" to find the install path if the above doesn't work
+
+You can then setup a cron job using the above code to have the scrape run daily to also give you the most up to date info. Make sure you don't hammer the website scraping. The data is only updated once a day so dont do minute or hourly scrapes as there will be no new data...
+
 
 Data is outputted as CSV to `flickDailyFormated.csv` and if configured will insert into an influxDB (refer above).
 
