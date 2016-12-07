@@ -7,6 +7,7 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 - Firefox
 - xvfb if wanting to run headless
 
+## System setup / prerequisite
 
 Install linux distro of choice (Ubuntu used for the below).
  
@@ -41,7 +42,12 @@ execute script: xvfb-run /home/[username]/.rbenv/shims/ruby /[pathtofile]/main.r
 
 Run "which ruby" to find the install path if the above doesn't work
 
-You can then setup a cron job using the above code to have the scrape run daily to also give you the most up to date info. Make sure you don't hammer the website scraping. The data is only updated once a day so dont do minute or hourly scrapes as there will be no new data...
+You can then setup a cron job using the above code to have the scrape run daily to also give you the most up to date info. 
+Make sure you don't hammer the website scraping. The data is only updated once a day so dont do minute or hourly scrapes as there will be no new data...
+
+## example crontab line
+crontab -e
+13 6,17,21 * * * xvfb-run /home/[username]/.rbenv/shims/ruby /home/[username]/flick_scrape/main.rb >> /home/[username]/flick_scrape/cron.log
 
 
 Data is outputted as CSV to `flickDailyFormated.csv` and if configured will insert into an influxDB (refer above).

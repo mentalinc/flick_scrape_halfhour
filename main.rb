@@ -3,12 +3,17 @@ require "rubygems"
 require "selenium-webdriver"
 require "csv"
 require "nokogiri"
+require "time"
 
 class FlickScrape
   EMAIL = ""
   PASSWORD = ""
   INFLUXDBURL = "http://192.168.2.238:8086"
   INFLUXDBNAME = "FlickUsage"
+  #Charges can be found here - https://www.flickelectric.co.nz/public_website/pricing
+  #check out the rates for your region to figure out the figures to include. I've split them out so if one of the fees change you can just update the one
+  FIXEDDAILYCHARGE = 99 + 21.66 + 40
+  FIXEDKWHCHARGE = 5.55 + 1.5 + 0.113
 
   def initialize
     @data_array = []
@@ -16,6 +21,10 @@ class FlickScrape
 
   def main
 
+    runLog = File.open("run.log", "a")
+    runLog.puts Time.now.strftime("%d/%m/%Y %H:%M") + "  Starting scrape of pricing"
+    
+    puts Time.now.strftime("%d/%m/%Y %H:%M")
     #remove old files with daily data
     if File.exist?("flickDaily.csv")
        File.delete("flickDaily.csv")
@@ -73,7 +82,7 @@ class FlickScrape
 			csv << ["unixTime", "cost", "kWh" ]
         end
 
-        CSV.foreach('flickDaily.csv') do |row|
+        CSV.foreach('flickDaily.csv',encoding:'utf-8') do |row|
 		tempRow = row.inspect
 	
 		if tempRow["How much electricity I used"]
@@ -94,7 +103,11 @@ class FlickScrape
 			cost =row[1].gsub('¢', '')
 			usage = row[2].gsub(' units', '')
 		     csv << [unixTimestamp, cost,usage]
-		     puts `curl -i -XPOST '#{INFLUXDBURL}/write?db=#{INFLUXDBNAME}&precision=s' --data-binary 'powerUsage,location=home cost=#{cost},kWh=#{usage} #{timestamp}' `
+			 
+			 halfHourlyCost = ((((usage.to_f * cost.to_f ) + (FIXEDDAILYCHARGE/48)))/100).round(5)
+				
+				puts `curl -i -XPOST '#{INFLUXDBURL}/write?db=#{INFLUXDBNAME}&precision=s' --data-binary 'powerUsage,location=home cost=#{cost},kWh=#{usage},DailyCharge=#{FIXEDDAILYCHARGE},fixedkWHCharge=#{FIXEDKWHCHARGE},halfHourlyCost=#{halfHourlyCost} #{timestamp}' `
+		    
 		  end
 	    end	
      end
