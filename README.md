@@ -7,6 +7,25 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 - Firefox
 - xvfb if wanting to run headless
 
+
+Install linux distro of choice (Ubuntu used for the below).
+ 
+sudo apt purge firefox && apt autoremove
+sudo apt update && apt install ruby ruby-dev firefox=45.0.2+build1-0ubuntu1 git
+ 
+Under a regular (non-root) user do:
+ 
+cd ~/
+git clone https://github.com/mentalinc/flick_scrape_halfhour.git
+cd flick_scrape_halfhour
+bundle install
+ 
+On your influxdb host:
+sudo influx
+CREATE DATABASE FlickUsage
+exit
+
+
 ## Usage
 
 - `bundle install`
@@ -26,6 +45,9 @@ You can then setup a cron job using the above code to have the scrape run daily 
 
 
 Data is outputted as CSV to `flickDailyFormated.csv` and if configured will insert into an influxDB (refer above).
+
+
+
 
 Known Issues:
 For some reason the html doesn't always get parsed or downloaded fully resulting in an error. Check error.log to identify days that are skipped. There is no fast or easy way to correct and redownload these yet.
