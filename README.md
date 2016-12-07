@@ -12,13 +12,17 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 Install linux distro of choice (Ubuntu used for the below).
  
 sudo apt purge firefox && apt autoremove
+
 sudo apt update && apt install ruby ruby-dev firefox=45.0.2+build1-0ubuntu1 git
  
 Under a regular (non-root) user do:
  
 cd ~/
+
 git clone https://github.com/mentalinc/flick_scrape_halfhour.git
+
 cd flick_scrape_halfhour
+
 bundle install
  
 On your influxdb host:
