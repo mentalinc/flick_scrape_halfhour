@@ -10,26 +10,25 @@ This is a stopgap script to scrape half hourly daily usage and pricing data from
 ## System setup / prerequisite
 
 Install linux distro of choice (Ubuntu used for the below).
- 
+
+```
 sudo apt purge firefox && apt autoremove
-
 sudo apt update && apt install ruby ruby-dev firefox=45.0.2+build1-0ubuntu1 git
- 
+```
+
 Under a regular (non-root) user do:
- 
+```
 cd ~/
-
 git clone https://github.com/mentalinc/flick_scrape_halfhour.git
-
 cd flick_scrape_halfhour
-
 bundle install
- 
+```
 On your influxdb host:
+```
 sudo influx
 CREATE DATABASE FlickUsage
 exit
-
+```
 
 ## Usage
 
@@ -41,24 +40,32 @@ exit
 
 
 ## To run headless
+```
 sudo apt-get xvfb
-execute script: xvfb-run /home/[username]/.rbenv/shims/ruby /[pathtofile]/main.rb
+```
+execute script: 
+```
+xvfb-run /home/[username]/.rbenv/shims/ruby /[pathtofile]/main.rb
+```
 
 Run "which ruby" to find the install path if the above doesn't work
 
 You can then setup a cron job using the above code to have the scrape run daily to also give you the most up to date info. 
 Make sure you don't hammer the website scraping. The data is only updated once a day so dont do minute or hourly scrapes as there will be no new data...
 
-## example crontab line
+## Example crontab line to have script running
+```
 crontab -e
 13 6,17,21 * * * xvfb-run /home/[username]/.rbenv/shims/ruby /home/[username]/flick_scrape/main.rb >> /home/[username]/flick_scrape/cron.log
+```
 
-
-## improved tracking of last 24 hours, week and month (30 days) based on the date scrapped (missing data will cause issues)
-# assuming you use the above cron tab to download the data.
+## better pricing data in Grafana
+Improved tracking of last 24 hours, week and month (30 days) based on the date scrapped (missing data will cause issues) assuming you use the above cron tab to download the data.
+```
+crontab -e
 15 6,17,21 * * * influx -execute 'DROP MEASUREMENT lastDay ; DROP MEASUREMENT lastRollingWeek; DROP MEASUREMENT lastRollingMonth' -database="FlickUsage"
 16 6,17,21 * * * influx -execute 'Select * INTO "lastDay"  FROM powerUsage GROUP BY * order by desc LIMIT 48 ; Select * INTO "lastRollingWeek" FROM powerUsage GROUP BY * order by desc LIMIT 336; Select * INTO "lastRollingMonth" FROM powerUsage GROUP BY * order by desc LIMIT 1440' -database="FlickUsage"
-
+```
 
 
 Data is outputted as CSV to `flickDailyFormated.csv` and if configured will insert into an influxDB (refer above).
