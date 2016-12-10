@@ -54,9 +54,14 @@ crontab -e
 13 6,17,21 * * * xvfb-run /home/[username]/.rbenv/shims/ruby /home/[username]/flick_scrape/main.rb >> /home/[username]/flick_scrape/cron.log
 
 
+## improved tracking of last 24 hours, week and month (30 days) based on the date scrapped (missing data will cause issues)
+# assuming you use the above cron tab to download the data.
+15 6,17,21 * * * influx -execute 'DROP MEASUREMENT lastDay ; DROP MEASUREMENT lastRollingWeek; DROP MEASUREMENT lastRollingMonth' -database="FlickUsage"
+16 6,17,21 * * * influx -execute 'Select * INTO "lastDay"  FROM powerUsage GROUP BY * order by desc LIMIT 48 ; Select * INTO "lastRollingWeek" FROM powerUsage GROUP BY * order by desc LIMIT 336; Select * INTO "lastRollingMonth" FROM powerUsage GROUP BY * order by desc LIMIT 1440' -database="FlickUsage"
+
+
+
 Data is outputted as CSV to `flickDailyFormated.csv` and if configured will insert into an influxDB (refer above).
-
-
 
 
 Known Issues:
